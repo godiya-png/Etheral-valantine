@@ -131,9 +131,15 @@ const App: React.FC = () => {
 
   const resetView = () => {
     setIsRevealed(false);
-    setError(null);
-    setView('form');
-    setMessage(null);
+    // Smooth transition back to form
+    setTimeout(() => {
+      setRecipient('');
+      setContext('');
+      setRelationship('partner');
+      setMessage(null);
+      setError(null);
+      setView('form');
+    }, 300);
   };
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
@@ -287,7 +293,7 @@ const App: React.FC = () => {
 
         {view === 'message' && message && (
           <div 
-            className={`w-full max-w-2xl transform transition-all duration-700 flex flex-col items-center ${
+            className={`w-full max-2xl transform transition-all duration-700 flex flex-col items-center ${
               isRevealed ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
             }`}
           >
