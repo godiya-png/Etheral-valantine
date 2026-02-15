@@ -63,7 +63,7 @@ const App: React.FC = () => {
       // Small timeout to ensure the DOM is ready for the transition
       setTimeout(() => {
         setIsRevealed(true);
-      }, 50);
+      }, 100);
     } catch (err) {
       console.error("Failed to generate:", err);
       setError("The stars aren't aligned right now. Please try again.");
@@ -138,6 +138,11 @@ const App: React.FC = () => {
   };
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+
+  // Split quote into words for the sequential animation
+  const quoteWords = message?.quote.split(' ') || [];
+  // Calculate delay for the author signature based on the number of words
+  const authorDelay = quoteWords.length * 150 + 400;
 
   return (
     <div className={`min-h-screen transition-colors duration-500 relative overflow-hidden flex flex-col ${
@@ -293,25 +298,38 @@ const App: React.FC = () => {
                 
                 <div className="relative z-10">
                   <blockquote 
-                    className={`text-2xl md:text-3xl font-serif leading-relaxed italic mb-8 transition-opacity duration-1000 ${
-                      isRevealed ? 'opacity-100' : 'opacity-0'
-                    } ${isDarkMode ? 'text-rose-100' : 'text-gray-700'}`}
+                    className={`text-2xl md:text-3xl font-serif leading-relaxed italic mb-8 ${isDarkMode ? 'text-rose-100' : 'text-gray-700'}`}
                   >
-                    "{message.quote}"
+                    {quoteWords.map((word, i) => (
+                      <span 
+                        key={i} 
+                        className={`inline-block transition-all duration-700 transform ${
+                          isRevealed ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-90'
+                        }`}
+                        style={{ 
+                          transitionDelay: `${i * 150}ms`,
+                          marginRight: '0.3em'
+                        }}
+                      >
+                        {word}
+                      </span>
+                    ))}
                   </blockquote>
 
                   <p 
-                    className={`font-cursive text-3xl transition-all duration-1000 delay-500 ${
+                    className={`font-cursive text-3xl transition-all duration-1000 ${
                       isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                     } ${isDarkMode ? 'text-rose-400' : 'text-rose-500'}`}
+                    style={{ transitionDelay: `${authorDelay}ms` }}
                   >
                     — {message.author}
                   </p>
 
                   <div 
-                    className={`mt-12 flex flex-col md:flex-row items-center justify-center gap-4 transition-all duration-1000 delay-700 ${
+                    className={`mt-12 flex flex-col md:flex-row items-center justify-center gap-4 transition-all duration-1000 ${
                       isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                     }`}
+                    style={{ transitionDelay: `${authorDelay + 300}ms` }}
                   >
                     <button 
                       onClick={() => handleShare()}
@@ -342,9 +360,10 @@ const App: React.FC = () => {
             
             <button 
               onClick={resetView}
-              className={`mt-8 font-semibold flex items-center space-x-1 hover:underline transition-opacity duration-1000 delay-1000 ${
+              className={`mt-8 font-semibold flex items-center space-x-1 hover:underline transition-opacity duration-1000 ${
                 isRevealed ? 'opacity-100' : 'opacity-0'
               } ${isDarkMode ? 'text-rose-400' : 'text-rose-500'}`}
+              style={{ transitionDelay: `${authorDelay + 600}ms` }}
             >
               <span>← Start Again</span>
             </button>
