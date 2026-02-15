@@ -3,6 +3,9 @@ import React from 'react';
 
 export const RELATIONSHIP_OPTIONS = [
   { value: 'partner', label: 'Partner/Significant Other' },
+  { value: 'spouse', label: 'Spouse/Life Partner' },
+  { value: 'anniversary', label: 'Anniversary Partner' },
+  { value: 'long_distance', label: 'Long-distance Love' },
   { value: 'crush', label: 'A Secret Crush' },
   { value: 'friend', label: 'A Best Friend' },
   { value: 'parent', label: 'A Parent' },

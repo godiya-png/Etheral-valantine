@@ -1,5 +1,5 @@
 
-export type RelationshipType = 'partner' | 'crush' | 'friend' | 'parent' | 'sibling';
+export type RelationshipType = 'partner' | 'crush' | 'friend' | 'parent' | 'sibling' | 'spouse' | 'anniversary' | 'long_distance';
 
 export interface ValentineMessageRequest {
   recipientName: string;

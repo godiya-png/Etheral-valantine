@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { GoogleGenAI, Type } from "@google/genai";
 
 // --- TYPES ---
-type RelationshipType = 'partner' | 'crush' | 'friend' | 'parent' | 'sibling';
+type RelationshipType = 'partner' | 'crush' | 'friend' | 'parent' | 'sibling' | 'spouse' | 'anniversary' | 'long_distance';
 
 interface GeneratedMessage {
   quote: string;
@@ -168,6 +168,12 @@ const App: React.FC = () => {
     setTimeout(() => setFeedback({ ...feedback, save: false }), 2000);
   };
 
+  // Split quote into words for staggered reveal
+  const quoteWords = useMemo(() => {
+    if (!message?.quote) return [];
+    return message.quote.split(' ');
+  }, [message?.quote]);
+
   return (
     <div className={`min-h-screen transition-all duration-1000 flex flex-col relative ${isDarkMode ? 'bg-gray-950 text-rose-100' : 'bg-rose-50 text-gray-800'}`}>
       <FloatingHearts isDarkMode={isDarkMode} />
@@ -207,8 +213,13 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <select value={relationship} onChange={e => setRelationship(e.target.value as any)} className={`px-4 py-3 rounded-xl border outline-none ${isDarkMode ? 'bg-gray-800 border-rose-800' : 'bg-white/50 border-rose-200'}`}>
                   <option value="partner">Partner</option>
+                  <option value="spouse">Spouse</option>
+                  <option value="anniversary">Anniversary Partner</option>
+                  <option value="long_distance">Long-distance Love</option>
                   <option value="crush">Crush</option>
                   <option value="friend">Friend</option>
+                  <option value="parent">Parent</option>
+                  <option value="sibling">Sibling</option>
                 </select>
                 <input type="text" value={context} onChange={e => setContext(e.target.value)} placeholder="Vibe (e.g. silly)" className={`px-4 py-3 rounded-xl border outline-none ${isDarkMode ? 'bg-gray-800 border-rose-800' : 'bg-white/50 border-rose-200'}`} />
               </div>
@@ -227,8 +238,20 @@ const App: React.FC = () => {
             <div className={`p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden backdrop-blur-xl ${isDarkMode ? 'bg-gray-900/90' : 'bg-white/95'}`}>
               <div className="shimmer-overlay" />
               <div className="relative z-10">
-                <blockquote className={`text-2xl md:text-3xl font-serif italic mb-8 fade-up-item ${isRevealed ? 'active' : ''}`}>"{message.quote}"</blockquote>
-                <p className={`font-cursive text-3xl text-rose-500 fade-up-item ${isRevealed ? 'active' : ''}`} style={{ transitionDelay: '300ms' }}>— {message.author || recipient}</p>
+                <div className="text-2xl md:text-3xl font-serif italic mb-8 flex flex-wrap justify-center gap-x-1">
+                  {quoteWords.map((word, idx) => (
+                    <span 
+                      key={idx} 
+                      className={`word-reveal ${isRevealed ? 'active' : ''}`}
+                      style={{ transitionDelay: `${500 + (idx * 60)}ms` }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </div>
+                <p className={`font-cursive text-3xl text-rose-500 fade-up-item ${isRevealed ? 'active' : ''}`} style={{ transitionDelay: `${800 + (quoteWords.length * 60)}ms` }}>
+                  — {message.author || recipient}
+                </p>
                 <div className="mt-12 flex flex-col md:flex-row gap-4 justify-center">
                   <button onClick={() => handleShare()} className="px-8 py-3 rounded-full font-bold bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition-all">
                     {feedback.copy ? 'Copied!' : 'Share the Love'}

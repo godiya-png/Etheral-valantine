@@ -69,6 +69,23 @@
         transform: translateY(0);
       }
 
+      /* Word-by-Word Reveal */
+      .word-reveal {
+        display: inline-block;
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+        filter: blur(4px);
+        transition: 
+          opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1),
+          transform 0.8s cubic-bezier(0.23, 1, 0.32, 1),
+          filter 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+      .word-reveal.active {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+      }
+
       .card-reveal {
         animation: card-reveal-kf 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
