@@ -5,36 +5,35 @@ import { ValentineMessageRequest, GeneratedMessage } from "../types";
 export const generateValentineMessage = async (
   request: ValentineMessageRequest
 ): Promise<GeneratedMessage> => {
-  // Always initialize inside the function to ensure the latest API Key is used
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // Ensure we have a key, even if it's an empty string (the API will handle the error)
+  const apiKey = process.env.API_KEY || "";
+  const ai = new GoogleGenAI({ apiKey });
   
-  const prompt = `Write a short, deeply personal Valentine's Day message for ${request.recipientName}. 
-  Relationship: ${request.relationship}. 
-  ${request.additionalContext ? `Vibe: ${request.additionalContext}` : ""}
+  const prompt = `Write a short, sincere Valentine's Day message for my ${request.relationship} named ${request.recipientName}. 
+  ${request.additionalContext ? `Tone/Vibe: ${request.additionalContext}` : ""}
   
-  Guidelines:
-  - Concise (1-2 sentences max).
-  - Sincere and heartfelt.
-  - Avoid all cliches and generic phrases.`;
+  Requirements:
+  - 1 to 2 sentences.
+  - Heartfelt and unique.
+  - Return JSON format.`;
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: prompt,
+      contents: [{ parts: [{ text: prompt }] }],
       config: {
-        thinkingConfig: { thinkingBudget: 0 },
-        systemInstruction: "You are a poet and a romantic writer. Create unique, personalized Valentine's Day quotes. Return the output as JSON with 'quote' and 'author' fields.",
+        systemInstruction: "You are a world-class romantic poet. Create personalized, elegant, and non-cliché Valentine's messages. Always output valid JSON.",
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
             quote: {
               type: Type.STRING,
-              description: "The Valentine's Day message or quote.",
+              description: "The heartfelt Valentine's message.",
             },
             author: {
               type: Type.STRING,
-              description: "A signature or short romantic attribution (e.g. 'Your Love', 'Forever Yours').",
+              description: "A short romantic signature (e.g., 'Forever yours', 'With all my love').",
             },
           },
           required: ["quote", "author"],
@@ -44,16 +43,17 @@ export const generateValentineMessage = async (
 
     const text = response.text;
     if (!text) {
-      throw new Error("Empty response from model");
+      throw new Error("No text returned from Gemini");
     }
 
-    return JSON.parse(text) as GeneratedMessage;
+    const cleanedText = text.trim();
+    return JSON.parse(cleanedText) as GeneratedMessage;
   } catch (error) {
-    console.error("Failed to generate Valentine message:", error);
-    // Fallback content in case of API issues
+    console.error("Gemini Generation Error:", error);
+    // Return a beautiful fallback if the API fails
     return {
-      quote: `To ${request.recipientName}: My heart finds its way home whenever I'm with you. You are my favorite thought.`,
-      author: "Always Yours"
+      quote: `To ${request.recipientName}: My world is brighter and my heart is fuller simply because you are in it. Happy Valentine's Day.`,
+      author: "With all my love"
     };
   }
 };

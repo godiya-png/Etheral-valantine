@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import FloatingHearts from './components/FloatingHearts';
 import { generateValentineMessage } from './services/geminiService';
-import { RELATIONSHIP_OPTIONS, HeartIcon, SparklesIcon, ShareIcon, ClipboardIcon, SunIcon, MoonIcon, BookmarkIcon, TrashIcon, ArrowLeftIcon } from './constants';
+import { RELATIONSHIP_OPTIONS, HeartIcon, SparklesIcon, ShareIcon, SunIcon, MoonIcon, BookmarkIcon, TrashIcon, ArrowLeftIcon } from './constants';
 import { RelationshipType, GeneratedMessage, SavedMessage } from './types';
 
 type AppView = 'form' | 'message' | 'favorites';
@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [relationship, setRelationship] = useState<RelationshipType>('partner');
   const [context, setContext] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<GeneratedMessage | null>(null);
   const [isRevealed, setIsRevealed] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
@@ -44,6 +45,7 @@ const App: React.FC = () => {
     if (!recipient) return;
 
     setLoading(true);
+    setError(null);
     setCopyFeedback(false);
     setIsRevealed(false);
 
@@ -57,10 +59,14 @@ const App: React.FC = () => {
       setMessage(generated);
       setView('message');
       setLoading(false);
-      // Reveal immediately after setting view
-      setIsRevealed(true);
-    } catch (error) {
-      console.error("Failed to generate:", error);
+      
+      // Small timeout to ensure the DOM is ready for the transition
+      setTimeout(() => {
+        setIsRevealed(true);
+      }, 50);
+    } catch (err) {
+      console.error("Failed to generate:", err);
+      setError("The stars aren't aligned right now. Please try again.");
       setLoading(false);
     }
   };
@@ -118,7 +124,6 @@ const App: React.FC = () => {
 
   const removeFavorite = (id: string) => {
     setRemovingId(id);
-    // Wait for the exit animation to finish before removing from state
     setTimeout(() => {
       setFavorites(prev => prev.filter(f => f.id !== id));
       setRemovingId(null);
@@ -127,6 +132,7 @@ const App: React.FC = () => {
 
   const resetView = () => {
     setIsRevealed(false);
+    setError(null);
     setView('form');
     setMessage(null);
   };
@@ -188,7 +194,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 flex flex-col items-center px-4 pb-20 relative z-10 w-full max-w-4xl mx-auto">
         {view === 'form' && (
-          <div className={`w-full max-w-lg p-8 rounded-3xl shadow-xl border backdrop-blur-md ${
+          <div className={`w-full max-w-lg p-8 rounded-3xl shadow-xl border backdrop-blur-md transition-all duration-500 ${
             isDarkMode 
               ? 'bg-gray-900/70 border-rose-900/50' 
               : 'bg-white/70 border-rose-100'
@@ -243,13 +249,21 @@ const App: React.FC = () => {
                 </div>
               </div>
 
+              {error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center">
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
                 className={`w-full py-4 rounded-xl font-bold text-white shadow-lg flex items-center justify-center space-x-2 transition-all duration-300 transform active:scale-95 ${
                   loading 
                     ? 'bg-rose-300 cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-400 hover:to-pink-400 hover:scale-[1.01]'
+                    : error 
+                      ? 'bg-rose-600 hover:bg-rose-500'
+                      : 'bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-400 hover:to-pink-400 hover:scale-[1.01]'
                 }`}
               >
                 {loading ? (
@@ -257,7 +271,7 @@ const App: React.FC = () => {
                 ) : (
                   <>
                     <SparklesIcon className="w-5 h-5" />
-                    <span>Generate Now</span>
+                    <span>{error ? 'Try Again' : 'Generate Now'}</span>
                   </>
                 )}
               </button>
@@ -267,8 +281,8 @@ const App: React.FC = () => {
 
         {view === 'message' && message && (
           <div 
-            className={`w-full max-w-2xl transform transition-all duration-500 flex flex-col items-center ${
-              isRevealed ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+            className={`w-full max-w-2xl transform transition-all duration-700 flex flex-col items-center ${
+              isRevealed ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95'
             }`}
           >
             <div className={`p-1 bg-gradient-to-tr from-rose-400 via-pink-300 to-red-400 rounded-[2rem] shadow-2xl w-full`}>
@@ -279,7 +293,7 @@ const App: React.FC = () => {
                 
                 <div className="relative z-10">
                   <blockquote 
-                    className={`text-2xl md:text-3xl font-serif leading-relaxed italic mb-8 transition-opacity duration-700 ${
+                    className={`text-2xl md:text-3xl font-serif leading-relaxed italic mb-8 transition-opacity duration-1000 ${
                       isRevealed ? 'opacity-100' : 'opacity-0'
                     } ${isDarkMode ? 'text-rose-100' : 'text-gray-700'}`}
                   >
@@ -287,7 +301,7 @@ const App: React.FC = () => {
                   </blockquote>
 
                   <p 
-                    className={`font-cursive text-3xl transition-all duration-700 delay-300 ${
+                    className={`font-cursive text-3xl transition-all duration-1000 delay-500 ${
                       isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                     } ${isDarkMode ? 'text-rose-400' : 'text-rose-500'}`}
                   >
@@ -295,14 +309,14 @@ const App: React.FC = () => {
                   </p>
 
                   <div 
-                    className={`mt-12 flex flex-col md:flex-row items-center justify-center gap-4 transition-all duration-700 delay-500 ${
-                      isRevealed ? 'opacity-100' : 'opacity-0'
+                    className={`mt-12 flex flex-col md:flex-row items-center justify-center gap-4 transition-all duration-1000 delay-700 ${
+                      isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                     }`}
                   >
                     <button 
                       onClick={() => handleShare()}
-                      className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all shadow-md active:scale-95 ${
-                        isDarkMode ? 'bg-rose-800 text-white' : 'bg-rose-500 text-white'
+                      className={`flex items-center space-x-2 px-8 py-3 rounded-full font-semibold transition-all shadow-md active:scale-95 ${
+                        isDarkMode ? 'bg-rose-800 text-white hover:bg-rose-700' : 'bg-rose-500 text-white hover:bg-rose-600'
                       }`}
                     >
                       {copyFeedback ? 'Copied!' : 'Share Love'}
@@ -310,7 +324,7 @@ const App: React.FC = () => {
                     
                     <button 
                       onClick={handleSaveFavorite}
-                      className={`flex items-center space-x-2 px-6 py-3 rounded-full font-semibold transition-all border ${
+                      className={`flex items-center space-x-2 px-8 py-3 rounded-full font-semibold transition-all border ${
                         saveFeedback 
                           ? 'bg-green-500/10 border-green-500 text-green-500'
                           : isDarkMode 
@@ -328,7 +342,7 @@ const App: React.FC = () => {
             
             <button 
               onClick={resetView}
-              className={`mt-8 font-semibold flex items-center space-x-1 hover:underline transition-opacity duration-700 delay-700 ${
+              className={`mt-8 font-semibold flex items-center space-x-1 hover:underline transition-opacity duration-1000 delay-1000 ${
                 isRevealed ? 'opacity-100' : 'opacity-0'
               } ${isDarkMode ? 'text-rose-400' : 'text-rose-500'}`}
             >
@@ -350,14 +364,17 @@ const App: React.FC = () => {
             </button>
 
             {favorites.length === 0 ? (
-              <p className="text-center py-20 opacity-30">Empty gallery.</p>
+              <div className="text-center py-20 opacity-30 flex flex-col items-center">
+                <HeartIcon className="w-10 h-10 mb-4" />
+                <p>Your gallery of love is empty.</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 gap-6">
                 {favorites.map((fav, index) => (
                   <div 
                     key={fav.id}
                     style={{ animationDelay: `${index * 80}ms` }}
-                    className={`p-6 rounded-[1.5rem] border shadow relative group transition-all opacity-0 ${
+                    className={`p-6 rounded-[1.5rem] border shadow-sm relative group transition-all opacity-0 ${
                       removingId === fav.id ? 'favorite-item-exit' : 'favorite-item-enter'
                     } ${
                       isDarkMode ? 'bg-gray-900/60 border-rose-900/30' : 'bg-white border-rose-100'
@@ -366,20 +383,23 @@ const App: React.FC = () => {
                     <div className="absolute top-4 right-4 flex space-x-2">
                       <button 
                         onClick={() => removeFavorite(fav.id)} 
-                        className="text-red-400 hover:text-red-500 transition-colors"
+                        className="text-rose-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                         aria-label="Remove from favorites"
                       >
                         <TrashIcon className="w-5 h-5" />
                       </button>
                     </div>
-                    <div className="text-[10px] uppercase font-bold opacity-40 mb-2">To: {fav.recipient} • {fav.date}</div>
-                    <p className="italic font-serif mb-2 text-lg">"{fav.quote}"</p>
-                    <p className="font-cursive text-2xl text-rose-500">— {fav.author}</p>
-                    
-                    <div className="absolute bottom-4 right-4 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                       <button 
+                    <div className="text-[10px] uppercase font-bold opacity-40 mb-2 tracking-widest">
+                      To: {fav.recipient} • {fav.date}
+                    </div>
+                    <p className={`italic font-serif mb-4 text-xl ${isDarkMode ? 'text-rose-100' : 'text-gray-700'}`}>
+                      "{fav.quote}"
+                    </p>
+                    <div className="flex justify-between items-end">
+                      <p className="font-cursive text-3xl text-rose-500">— {fav.author}</p>
+                      <button 
                         onClick={() => handleShare(fav)}
-                        className="text-rose-400 hover:text-rose-500 p-2"
+                        className="text-rose-400 hover:text-rose-500 p-2 transition-transform hover:scale-110"
                         aria-label="Share this message"
                       >
                         <ShareIcon className="w-5 h-5" />
@@ -393,7 +413,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <footer className={`py-4 text-center text-xs font-serif opacity-30 transition-colors duration-1000`}>
+      <footer className={`py-8 text-center text-xs font-serif opacity-30 transition-colors duration-1000`}>
         <p>Coded with ❤️ by dev deeyarh</p>
       </footer>
     </div>
