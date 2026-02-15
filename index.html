@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ethereal Valentine</title>
+    <title>Ethereal Valentine | A Poetic Love Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
@@ -13,12 +13,10 @@
         font-family: 'Inter', sans-serif;
         overflow-x: hidden;
       }
-      .font-cursive {
-        font-family: 'Dancing Script', cursive;
-      }
-      .font-serif {
-        font-family: 'Playfair Display', serif;
-      }
+      .font-cursive { font-family: 'Dancing Script', cursive; }
+      .font-serif { font-family: 'Playfair Display', serif; }
+      
+      /* Background Floating Hearts */
       @keyframes float {
         0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
         10% { opacity: 1; }
@@ -60,7 +58,7 @@
         mix-blend-mode: overlay;
       }
 
-      /* Ultra Fluid Fade & Scale reveal */
+      /* Ultra Fluid Fade & Scale Reveal */
       .fade-up-item {
         opacity: 0;
         transform: translateY(40px) scale(0.92);
@@ -77,7 +75,7 @@
         filter: blur(0px);
       }
 
-      /* Card entrance animation */
+      /* Card Entrance Animation */
       .card-reveal {
         animation: card-reveal-kf 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
@@ -93,20 +91,27 @@
         from { opacity: 0; }
         to { opacity: 1; }
       }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(244, 63, 94, 0.2); border-radius: 10px; }
     </style>
-  <script type="importmap">
+    <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.4/",
     "react": "https://esm.sh/react@^19.2.4",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react-dom": "https://esm.sh/react-dom@^19.2.4",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
     "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
     "vite": "https://esm.sh/vite@^7.3.1",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
   }
 }
 </script>
-</head>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
