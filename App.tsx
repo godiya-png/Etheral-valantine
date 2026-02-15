@@ -19,6 +19,7 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [favorites, setFavorites] = useState<SavedMessage[]>([]);
   const [saveFeedback, setSaveFeedback] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -116,7 +117,12 @@ const App: React.FC = () => {
   };
 
   const removeFavorite = (id: string) => {
-    setFavorites(prev => prev.filter(f => f.id !== id));
+    setRemovingId(id);
+    // Wait for the exit animation to finish before removing from state
+    setTimeout(() => {
+      setFavorites(prev => prev.filter(f => f.id !== id));
+      setRemovingId(null);
+    }, 300);
   };
 
   const resetView = () => {
@@ -335,7 +341,7 @@ const App: React.FC = () => {
           <div className="w-full max-w-3xl space-y-6 animate-fade-in">
             <button 
               onClick={() => setView('form')}
-              className={`flex items-center space-x-2 font-semibold ${
+              className={`flex items-center space-x-2 font-semibold transition-colors ${
                 isDarkMode ? 'text-rose-400 hover:text-rose-300' : 'text-rose-600 hover:text-rose-500'
               }`}
             >
@@ -347,19 +353,38 @@ const App: React.FC = () => {
               <p className="text-center py-20 opacity-30">Empty gallery.</p>
             ) : (
               <div className="grid grid-cols-1 gap-6">
-                {favorites.map((fav) => (
+                {favorites.map((fav, index) => (
                   <div 
                     key={fav.id}
-                    className={`p-6 rounded-[1.5rem] border shadow relative group transition-all ${
+                    style={{ animationDelay: `${index * 80}ms` }}
+                    className={`p-6 rounded-[1.5rem] border shadow relative group transition-all opacity-0 ${
+                      removingId === fav.id ? 'favorite-item-exit' : 'favorite-item-enter'
+                    } ${
                       isDarkMode ? 'bg-gray-900/60 border-rose-900/30' : 'bg-white border-rose-100'
                     }`}
                   >
                     <div className="absolute top-4 right-4 flex space-x-2">
-                      <button onClick={() => removeFavorite(fav.id)} className="text-red-400 hover:text-red-500"><TrashIcon className="w-5 h-5" /></button>
+                      <button 
+                        onClick={() => removeFavorite(fav.id)} 
+                        className="text-red-400 hover:text-red-500 transition-colors"
+                        aria-label="Remove from favorites"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
                     </div>
                     <div className="text-[10px] uppercase font-bold opacity-40 mb-2">To: {fav.recipient} • {fav.date}</div>
-                    <p className="italic font-serif mb-2">"{fav.quote}"</p>
-                    <p className="font-cursive text-rose-500">— {fav.author}</p>
+                    <p className="italic font-serif mb-2 text-lg">"{fav.quote}"</p>
+                    <p className="font-cursive text-2xl text-rose-500">— {fav.author}</p>
+                    
+                    <div className="absolute bottom-4 right-4 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                       <button 
+                        onClick={() => handleShare(fav)}
+                        className="text-rose-400 hover:text-rose-500 p-2"
+                        aria-label="Share this message"
+                      >
+                        <ShareIcon className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -369,7 +394,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className={`py-4 text-center text-xs font-serif opacity-30 transition-colors duration-1000`}>
-        <p>Coded by dev deeyarh</p>
+        <p>Coded with ❤️ by dev deeyarh</p>
       </footer>
     </div>
   );
