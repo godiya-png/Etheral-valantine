@@ -33,11 +33,13 @@
         z-index: 0;
       }
       
-      /* Shimmer Effect */
+      /* Refined Shimmer Effect */
       @keyframes shimmer {
-        0% { transform: translateX(-150%) skewX(-20deg); }
-        50% { transform: translateX(150%) skewX(-20deg); }
-        100% { transform: translateX(150%) skewX(-20deg); }
+        0% { transform: translateX(-200%) skewX(-20deg); opacity: 0; }
+        10% { opacity: 0.5; }
+        50% { opacity: 1; }
+        90% { opacity: 0.5; }
+        100% { transform: translateX(200%) skewX(-20deg); opacity: 0; }
       }
       .shimmer-overlay {
         position: absolute;
@@ -48,23 +50,48 @@
         background: linear-gradient(
           to right,
           transparent 0%,
-          rgba(255, 255, 255, 0.4) 50%,
+          rgba(255, 255, 255, 0) 25%,
+          rgba(255, 255, 255, 0.6) 50%,
+          rgba(255, 255, 255, 0) 75%,
           transparent 100%
         );
         pointer-events: none;
-        animation: shimmer 4s infinite ease-in-out;
+        animation: shimmer 4.5s infinite ease-in-out;
+        mix-blend-mode: overlay;
       }
 
-      /* Enhanced Staggered Fade In with Scale */
+      /* Ultra Fluid Fade & Scale reveal */
       .fade-up-item {
         opacity: 0;
-        transform: translateY(25px) scale(0.96);
-        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
-                    transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(40px) scale(0.92);
+        filter: blur(12px);
+        transition: 
+          opacity 1.4s cubic-bezier(0.23, 1, 0.32, 1),
+          transform 1.6s cubic-bezier(0.23, 1, 0.32, 1),
+          filter 1.4s cubic-bezier(0.23, 1, 0.32, 1);
+        will-change: transform, opacity, filter;
       }
       .fade-up-item.active {
         opacity: 1;
         transform: translateY(0) scale(1);
+        filter: blur(0px);
+      }
+
+      /* Card entrance animation */
+      .card-reveal {
+        animation: card-reveal-kf 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes card-reveal-kf {
+        0% { opacity: 0; transform: scale(0.95) translateY(30px); filter: brightness(0.8); }
+        100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+      }
+
+      .animate-fade-in {
+        animation: fadeIn 1.2s ease-out forwards;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
       }
     </style>
   <script type="importmap">

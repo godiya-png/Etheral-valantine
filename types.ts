@@ -11,3 +11,10 @@ export interface GeneratedMessage {
   quote: string;
   author?: string;
 }
+
+export interface SavedMessage extends GeneratedMessage {
+  id: string;
+  recipient: string;
+  relationship: string;
+  date: string;
+}
